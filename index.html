@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RevaluatR - Institutional-Grade Real Estate Valuation</title>
+    <meta name="description" content="Institutional-grade automated valuation engine for German commercial real estate. Coming soon.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #0018A8;
+            --accent-blue: #005EB8;
+            --dark-gray: #1a1a1a;
+            --medium-gray: #666666;
+            --light-gray: #f5f5f5;
+            --white: #ffffff;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--dark-gray);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-blue));
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--light-gray);
+            color: var(--medium-gray);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 32px;
+        }
+
+        .tagline {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .description {
+            font-size: 16px;
+            color: var(--medium-gray);
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .waitlist-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 4px rgba(0, 24, 168, 0.1);
+        }
+
+        .form-input.error {
+            border-color: var(--error-red);
+        }
+
+        .error-message {
+            color: var(--error-red);
+            font-size: 14px;
+            text-align: left;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .submit-btn {
+            background: var(--primary-blue);
+            color: var(--white);
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .submit-btn:hover {
+            background: var(--accent-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 24, 168, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            background: var(--medium-gray);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-message {
+            display: none;
+            background: var(--success-green);
+            color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 14px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .feature-text {
+            font-size: 15px;
+            color: var(--medium-gray);
+            line-height: 1.5;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 14px;
+            color: var(--medium-gray);
+        }
+
+        .footer a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 40px 24px;
+            }
+
+            .logo {
+                font-size: 36px;
+            }
+
+            .tagline {
+                font-size: 20px;
+            }
+
+            .description {
+                font-size: 15px;
+            }
+        }
+
+        .loader {
+            display: none;
+            border: 3px solid var(--light-gray);
+            border-top: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        .loader.show {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="logo">RevaluatR</h1>
+        <div class="badge">Coming Soon</div>
+        
+        <h2 class="tagline">Institutional-Grade Real Estate Valuation</h2>
+        <p class="description">
+            Automated valuation engine for German commercial real estate. 
+            Powered by institutional data sources and proprietary algorithms.
+        </p>
+
+        <div class="success-message" id="successMessage">
+            ✓ Thank you! You've been added to our waitlist. We'll notify you when we launch.
+        </div>
+
+        <form class="waitlist-form" id="waitlistForm">
+            <div class="form-group">
+                <input 
+                    type="text" 
+                    class="form-input" 
+                    id="nameInput"
+                    placeholder="Your name"
+                    required
+                >
+                <div class="error-message" id="nameError">Please enter your name</div>
+            </div>
+
+            <div class="form-group">
+                <input 
+                    type="email" 
+                    class="form-input" 
+                    id="emailInput"
+                    placeholder="Your email"
+                    required
+                >
+                <div class="error-message" id="emailError">Please enter a valid email</div>
+            </div>
+
+            <div class="form-group">
+                <input 
+                    type="text" 
+                    class="form-input" 
+                    id="companyInput"
+                    placeholder="Company (optional)"
+                >
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Join Waitlist
+            </button>
+            <div class="loader" id="loader"></div>
+        </form>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <div class="feature-text">
+                    <strong>Institutional Data Sources:</strong> CBRE, JLL, GREIX, BNP Paribas
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <div class="feature-text">
+                    <strong>±15% Accuracy Target:</strong> Validated against real German transactions
+                </div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <div class="feature-text">
+                    <strong>Regional Intelligence:</strong> Tier 1 & Tier 2 city market analysis
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Questions? Contact us at <a href="mailto:agon.aliu@spinp.tech">agon.aliu@spinp.tech</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('waitlistForm');
+        const nameInput = document.getElementById('nameInput');
+        const emailInput = document.getElementById('emailInput');
+        const companyInput = document.getElementById('companyInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMessage = document.getElementById('successMessage');
+        const nameError = document.getElementById('nameError');
+        const emailError = document.getElementById('emailError');
+        const loader = document.getElementById('loader');
+
+        // Email validation regex
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Reset errors
+            nameError.classList.remove('show');
+            emailError.classList.remove('show');
+            nameInput.classList.remove('error');
+            emailInput.classList.remove('error');
+
+            // Validate
+            let isValid = true;
+
+            if (!nameInput.value.trim()) {
+                nameError.classList.add('show');
+                nameInput.classList.add('error');
+                isValid = false;
+            }
+
+            if (!emailInput.value.trim() || !emailRegex.test(emailInput.value)) {
+                emailError.classList.add('show');
+                emailInput.classList.add('error');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            // Show loader
+            submitBtn.style.display = 'none';
+            loader.classList.add('show');
+
+            try {
+                // Send to backend
+                const response = await fetch('/api/waitlist', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: nameInput.value.trim(),
+                        email: emailInput.value.trim(),
+                        company: companyInput.value.trim(),
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                if (response.ok) {
+                    // Success!
+                    successMessage.classList.add('show');
+                    form.style.display = 'none';
+                    
+                    // Optional: Track with analytics
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'waitlist_signup', {
+                            'event_category': 'engagement',
+                            'event_label': 'landing_page'
+                        });
+                    }
+                } else {
+                    throw new Error('Submission failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Something went wrong. Please try again or email us directly at agon.aliu@spinp.tech');
+                submitBtn.style.display = 'block';
+                loader.classList.remove('show');
+            }
+        });
+
+        // Remove error styling on input
+        nameInput.addEventListener('input', () => {
+            nameInput.classList.remove('error');
+            nameError.classList.remove('show');
+        });
+
+        emailInput.addEventListener('input', () => {
+            emailInput.classList.remove('error');
+            emailError.classList.remove('show');
+        });
+    </script>
+</body>
+</html>
