@@ -10,6 +10,11 @@ import csv
 import os
 from datetime import datetime
 import json
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import gspread
+from google.oauth2.service_account import Credentials
 
 app = Flask(__name__, static_folder='.')
 CORS(app)  # Enable CORS for API requests
@@ -22,6 +27,87 @@ if not os.path.exists(WAITLIST_FILE):
     with open(WAITLIST_FILE, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(['Timestamp', 'Name', 'Email', 'Company', 'IP Address'])
+
+# Email and Google Sheets configuration
+EMAIL_ENABLED = os.environ.get('EMAIL_ENABLED', 'false').lower() == 'true'
+SHEETS_ENABLED = os.environ.get('SHEETS_ENABLED', 'false').lower() == 'true'
+
+def send_email_notification(name, email, company, timestamp):
+    """Send email notification for new signup"""
+    if not EMAIL_ENABLED:
+        return
+
+    try:
+        sender_email = os.environ.get('SMTP_EMAIL')
+        sender_password = os.environ.get('SMTP_PASSWORD')
+        recipient_email = os.environ.get('NOTIFICATION_EMAIL')
+
+        if not all([sender_email, sender_password, recipient_email]):
+            print("Email credentials not configured")
+            return
+
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = recipient_email
+        msg['Subject'] = f'New RevaluatR Waitlist Signup: {name}'
+
+        body = f"""
+New waitlist signup!
+
+Name: {name}
+Email: {email}
+Company: {company or 'N/A'}
+Timestamp: {timestamp}
+
+--
+RevaluatR Automated Notification
+"""
+
+        msg.attach(MIMEText(body, 'plain'))
+
+        # Use Gmail SMTP
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.send_message(msg)
+
+        print(f"Email notification sent for: {email}")
+
+    except Exception as e:
+        print(f"Error sending email: {str(e)}")
+
+def save_to_google_sheets(name, email, company, timestamp, ip_address):
+    """Save signup to Google Sheets"""
+    if not SHEETS_ENABLED:
+        return
+
+    try:
+        # Get credentials from environment variable
+        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
+        spreadsheet_id = os.environ.get('GOOGLE_SHEETS_ID')
+
+        if not creds_json or not spreadsheet_id:
+            print("Google Sheets not configured")
+            return
+
+        # Parse credentials
+        creds_dict = json.loads(creds_json)
+        creds = Credentials.from_service_account_info(
+            creds_dict,
+            scopes=['https://www.googleapis.com/auth/spreadsheets']
+        )
+
+        # Connect to Google Sheets
+        client = gspread.authorize(creds)
+        sheet = client.open_by_key(spreadsheet_id).sheet1
+
+        # Append row
+        sheet.append_row([timestamp, name, email, company, ip_address])
+
+        print(f"Saved to Google Sheets: {email}")
+
+    except Exception as e:
+        print(f"Error saving to Google Sheets: {str(e)}")
 
 @app.route('/')
 def index():
@@ -59,10 +145,16 @@ def add_to_waitlist():
         with open(WAITLIST_FILE, 'a', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerow([timestamp, name, email, company, ip_address])
-        
+
+        # Send email notification
+        send_email_notification(name, email, company, timestamp)
+
+        # Save to Google Sheets
+        save_to_google_sheets(name, email, company, timestamp, ip_address)
+
         # Log signup
         print(f"New waitlist signup: {name} ({email}) from {company or 'N/A'}")
-        
+
         return jsonify({
             'message': 'Successfully added to waitlist',
             'email': email
