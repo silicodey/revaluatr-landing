@@ -356,101 +356,100 @@
         </div>
     </div>
 
-    <script>
-        // IMPORTANT: Replace this URL with your Render backend URL after deployment
-        const API_URL = 'https://revaluatr-landing.onrender.com';
+    // Backend API URL (paid Render instance - always on, no spin-down)
+    const API_URL = 'https://revaluatr.onrender.com';
 
-        const form = document.getElementById('waitlistForm');
-        const nameInput = document.getElementById('nameInput');
-        const emailInput = document.getElementById('emailInput');
-        const companyInput = document.getElementById('companyInput');
-        const submitBtn = document.getElementById('submitBtn');
-        const successMessage = document.getElementById('successMessage');
-        const nameError = document.getElementById('nameError');
-        const emailError = document.getElementById('emailError');
-        const loader = document.getElementById('loader');
+    const form = document.getElementById('waitlistForm');
+    const nameInput = document.getElementById('nameInput');
+    const emailInput = document.getElementById('emailInput');
+    const companyInput = document.getElementById('companyInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const successMessage = document.getElementById('successMessage');
+    const nameError = document.getElementById('nameError');
+    const emailError = document.getElementById('emailError');
+    const loader = document.getElementById('loader');
 
-        // Email validation regex
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-            // Reset errors
-            nameError.classList.remove('show');
-            emailError.classList.remove('show');
-            nameInput.classList.remove('error');
-            emailInput.classList.remove('error');
+    // Reset errors
+    nameError.classList.remove('show');
+    emailError.classList.remove('show');
+    nameInput.classList.remove('error');
+    emailInput.classList.remove('error');
 
-            // Validate
-            let isValid = true;
+    // Validate
+    let isValid = true;
 
-            if (!nameInput.value.trim()) {
-                nameError.classList.add('show');
-                nameInput.classList.add('error');
-                isValid = false;
-            }
+    if (!nameInput.value.trim()) {
+    nameError.classList.add('show');
+    nameInput.classList.add('error');
+    isValid = false;
+    }
 
-            if (!emailInput.value.trim() || !emailRegex.test(emailInput.value)) {
-                emailError.classList.add('show');
-                emailInput.classList.add('error');
-                isValid = false;
-            }
+    if (!emailInput.value.trim() || !emailRegex.test(emailInput.value)) {
+    emailError.classList.add('show');
+    emailInput.classList.add('error');
+    isValid = false;
+    }
 
-            if (!isValid) return;
+    if (!isValid) return;
 
-            // Show loader
-            submitBtn.style.display = 'none';
-            loader.classList.add('show');
+    // Show loader
+    submitBtn.style.display = 'none';
+    loader.classList.add('show');
 
-            try {
-                // Send to backend API on Render
-                const response = await fetch(`${API_URL}/api/waitlist`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name: nameInput.value.trim(),
-                        email: emailInput.value.trim(),
-                        company: companyInput.value.trim(),
-                        timestamp: new Date().toISOString()
-                    })
-                });
+    try {
+    // Send to backend API on Render
+    const response = await fetch(`${API_URL}/api/waitlist`, {
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+    name: nameInput.value.trim(),
+    email: emailInput.value.trim(),
+    company: companyInput.value.trim(),
+    timestamp: new Date().toISOString()
+    })
+    });
 
-                if (response.ok) {
-                    // Success!
-                    successMessage.classList.add('show');
-                    form.style.display = 'none';
+    if (response.ok) {
+    // Success!
+    successMessage.classList.add('show');
+    form.style.display = 'none';
 
-                    // Optional: Track with analytics
-                    if (typeof gtag !== 'undefined') {
-                        gtag('event', 'waitlist_signup', {
-                            'event_category': 'engagement',
-                            'event_label': 'landing_page'
-                        });
-                    }
-                } else {
-                    throw new Error('Submission failed');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Something went wrong. Please try again or email us directly at contact@revaluatr.com');
-                submitBtn.style.display = 'block';
-                loader.classList.remove('show');
-            }
-        });
+    // Optional: Track with analytics
+    if (typeof gtag !== 'undefined') {
+    gtag('event', 'waitlist_signup', {
+    'event_category': 'engagement',
+    'event_label': 'landing_page'
+    });
+    }
+    } else {
+    throw new Error('Submission failed');
+    }
+    } catch (error) {
+    console.error('Error:', error);
+    alert('Something went wrong. Please try again or email us directly at contact@revaluatr.com');
+    submitBtn.style.display = 'block';
+    loader.classList.remove('show');
+    }
+    });
 
-        // Remove error styling on input
-        nameInput.addEventListener('input', () => {
-            nameInput.classList.remove('error');
-            nameError.classList.remove('show');
-        });
+    // Remove error styling on input
+    nameInput.addEventListener('input', () => {
+    nameInput.classList.remove('error');
+    nameError.classList.remove('show');
+    });
 
-        emailInput.addEventListener('input', () => {
-            emailInput.classList.remove('error');
-            emailError.classList.remove('show');
-        });
+    emailInput.addEventListener('input', () => {
+    emailInput.classList.remove('error');
+    emailError.classList.remove('show');
+    });
     </script>
 </body>
 
